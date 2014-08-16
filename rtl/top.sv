@@ -13,9 +13,17 @@ module top
  output logic [num_pwm-1:0] pwm_out
  );
 
+function integer roundup8;
+   input integer            bits;
+   begin
+      return (bits + 7) / 8 * 8;
+   end
+endfunction
+
+
 localparam pwm_bits = $clog2(num_pwm);
-localparam pwm_bytes = (pwm_bits + 7) / 8;
-localparam spi_width = pwm_width + pwm_bytes * 8;
+localparam spi_data_bits = roundup8($clog2(pwm_width));
+localparam spi_width = spi_data_bits + roundup8(pwm_bits);
 
    logic [spi_width-1:0]    spi_data;
    logic                    spi_valid;
@@ -30,7 +38,7 @@ localparam spi_width = pwm_width + pwm_bytes * 8;
    genvar                   pwm_id;
 
 
-assign pwm_sel_bin = spi_data[spi_width-1:pwm_width];
+assign pwm_sel_bin = spi_data[spi_width-1:spi_width-spi_data_bits];
 assign pwm_sel_onehot = 1 << pwm_sel_bin;
 assign pwm_thres = spi_data[pwm_width-1:0];
 
