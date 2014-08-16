@@ -1,8 +1,6 @@
 #--  Synopsys, Inc.
 #--  Version I-2013.09L-SP1 
 #--  Project file /home/corecode/devel/electronics/bledim/bledim_syn.prj
-#--  Written on Sat Aug 16 01:02:37 2014
-
 
 #project files
 
@@ -32,8 +30,9 @@ set_option -part_companion ""
 set_option -top_module "top"
 
 # mapper_options
-set_option -frequency auto
-set_option -write_verilog 0
+set_option -frequency 50.000000
+set_option -auto_constrain_io 1
+set_option -write_verilog 1
 set_option -write_vhdl 0
 set_option -srs_instrumentation 1
 
@@ -42,7 +41,7 @@ set_option -maxfan 10000
 set_option -RWCheckOnRam 0
 set_option -disable_io_insertion 0
 set_option -pipe 1
-set_option -retiming 0
+set_option -retiming 1
 set_option -update_models_cp 0
 set_option -fix_gated_and_generated_clocks 1
 set_option -run_prop_extract 1
@@ -53,8 +52,10 @@ set_option -symbolic_fsm_compiler 1
 # Compiler Options
 set_option -compiler_compatible 0
 set_option -resource_sharing 1
+set_option -multi_file_compilation_unit 1
 
 # Compiler Options
+set_option -beta_vfeatures 1
 set_option -auto_infer_blackbox 0
 
 #automatic place and route (vendor) options
