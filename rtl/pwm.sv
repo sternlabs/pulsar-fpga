@@ -13,7 +13,9 @@ module pwm
    logic                    pwm_match;
 
 
-assign pwm_match = counter == thres;
+// manually calculate comparison to avoid the default comparator
+// implementation, which uses carry chains and overflows our fpga.
+assign pwm_match = ~ |(counter ^ thres);
 
 always_ff @(posedge clk)
   if (overflow & set_thres)

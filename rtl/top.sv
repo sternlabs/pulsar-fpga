@@ -1,6 +1,6 @@
 module top
   #(
-    parameter pwm_width = 8,
+    parameter pwm_width = 16,
     parameter num_pwm = 12
     )
 (
