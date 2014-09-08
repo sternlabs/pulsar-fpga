@@ -4,6 +4,7 @@ module pwm
 )
 (
  input wire                       clk,
+ input wire                       rst,
  input wire [pwm_width-1:0]       new_thres,
  input wire [$clog2(num_pwm)-1:0] sel_thres,
  input wire                       set_thres,
@@ -11,41 +12,65 @@ module pwm
  );
 
 
-   logic [num_pwm-1:0]      pwm_sel_onehot;
+   logic [pwm_width-1:0]          counter, counter_nxt;
+   logic                          overflow, overflow_nxt;
 
-   logic [pwm_width-1:0]    counter;
-   logic                    overflow;
+   logic [pwm_width-1:0]          thres [num_pwm] = {0}, cur_thres;
 
-   genvar                   pwm_id;
+   logic [$clog2(num_pwm)-1:0]    pwm_round = 0, pwm_round_nxt;
+   logic                          new_round;
+
+   logic                          pwm_match;
 
 
-assign pwm_sel_onehot = 1 << sel_thres;
+assign pwm_round_nxt = pwm_round + 1;
+assign new_round = pwm_round == num_pwm-1;
+
+always_ff @(posedge clk or posedge rst)
+  if (rst)
+  begin
+     cur_thres <= 0;
+     pwm_round <= 0;
+  end else begin
+     cur_thres <= thres[pwm_round_nxt];
+     pwm_round <= pwm_round_nxt;
+  end
 
 
-counter #(.counter_width(pwm_width)) counter_i(.*);
+assign counter_nxt = counter + 1;
+assign overflow_nxt = (counter[pwm_width-1] == 1'b1) &
+                      (counter_nxt[pwm_width-1] == 1'b0);
 
-for (pwm_id = 0; pwm_id < num_pwm; ++pwm_id)
-begin
+always_ff @(posedge clk or posedge rst)
+  if (rst)
+  begin
+     counter  <= 0;
+     overflow <= 0;
+  end else
+    if (new_round)
+    begin
+       counter  <= counter_nxt;
+       overflow <= overflow_nxt;
+    end
 
-   logic [pwm_width-1:0]    thres;
-   logic                    pwm_match;
 
-   // manually calculate comparison to avoid the default comparator
-   // implementation, which uses carry chains and overflows our fpga.
-   assign pwm_match = ~ |(counter ^ thres);
+// manually calculate comparison to avoid the default comparator
+// implementation, which uses carry chains and overflows our fpga.
+assign pwm_match = ~(|(counter ^ cur_thres));
 
-   always_ff @(posedge clk)
-     if (overflow & set_thres & pwm_sel_onehot[pwm_id])
-       thres <= new_thres;
+always_ff @(posedge clk or posedge rst)
+  if (rst)
+    pwm_out <= '{0};
+  else begin
+     if (overflow)
+       pwm_out[pwm_round] <= 1;
+     if (pwm_match)
+       pwm_out[pwm_round] <= 0;
+  end
+
 
 always_ff @(posedge clk)
-begin
-   if (overflow)
-     pwm_out[pwm_id] <= 1;
-   if (pwm_match)
-     pwm_out[pwm_id] <= 0;
-end
-
-end
+  if (overflow & set_thres)
+    thres[sel_thres] <= new_thres;
 
 endmodule
