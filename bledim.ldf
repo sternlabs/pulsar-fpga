@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BaliProject version="3.2" title="bledim" device="LCMXO2-256ZE-1SG32C" default_implementation="bledim">
+    <Options/>
+    <Implementation title="bledim" dir="bledim" description="bledim" synthesis="synplify" default_strategy="Strategy1">
+        <Options top="top"/>
+        <Source name="rtl/top.sv" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="rtl/pwm.sv" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="rtl/spi_slave.sv" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="bledim.lpf" type="Logic Preference" type_short="LPF">
+            <Options/>
+        </Source>
+    </Implementation>
+    <Strategy name="Strategy1" file="bledim1.sty"/>
+</BaliProject>
