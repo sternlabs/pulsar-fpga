@@ -5,17 +5,15 @@ module pwm_tb;
 
    logic clk;
    logic rst;
-   logic [3:0] new_thres;
-   logic [1:0] sel_thres;
-   logic       set_thres = 0;
+   logic [2:0] thres [3:0];
    logic [3:0] pwm_out;
 
-pwm #(.pwm_width(4), .num_pwm(4)) dut(.*);
+pwm #(.pwm_width(3), .num_pwm(4)) dut(.*);
 
-initial begin
-   $dumpfile("pwm_tb.vcd");
-   $dumpvars(0, pwm_tb);
-end
+// initial begin
+//    $dumpfile("pwm_tb.vcd");
+//    $dumpvars(0);
+// end
 
 initial
   #10000 $finish;
@@ -33,10 +31,9 @@ initial begin
 end
 
 initial begin
+   thres = '{ 0, 0, 0, 0 };
    #50;
-   new_thres  = 5;
-   sel_thres  = 0;
-   set_thres  = 1;
+   thres  = '{ 2, 4, 7, 1 };
 end
 
 

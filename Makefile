@@ -42,4 +42,4 @@ compile-synplify:
 simulate: $(patsubst %.sv,%.vcd,${TBS})
 
 %.vcd: compile-modelsim.stamp
-	${MODELSIMDIR}/vsim -c -do 'run -all' ${@:.vcd=}
+	${MODELSIMDIR}/vsim -c -do 'vcd file $@; vcd add -r *; run -all' ${@:.vcd=}
