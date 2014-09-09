@@ -79,7 +79,8 @@ assign pwm_match = ~(|(counter ^ cur_thres));
 
 always_comb
 begin
-   pwm_event = 0;
+   pwm_event  = 0;
+   match_result = 0;
    if (overflow)
    begin
       match_result  = 1;

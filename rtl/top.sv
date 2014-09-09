@@ -9,6 +9,7 @@ module top
  input wire                 MOSI,
 
  input wire                 clk,
+ input wire                 rst,
 
  output logic [num_pwm-1:0] pwm_out
  );
@@ -27,16 +28,19 @@ localparam spi_width = spi_data_bits + roundup8(pwm_bits);
    logic [spi_width-1:0]    spi_data;
    logic                    spi_valid;
 
-   logic [pwm_width-1:0]    pwm_thres;
-   logic [pwm_bits-1:0]     pwm_sel;
+   logic [pwm_width-1:0]    thres [num_pwm-1:0];
 
 
-assign pwm_sel = spi_data[spi_width-1:spi_width-spi_data_bits];
-assign pwm_thres = spi_data[pwm_width-1:0];
+always_ff @(posedge clk or posedge rst)
+  if (rst)
+    thres <= {default:'0};
+  else
+     if (spi_valid)
+       thres[spi_data[spi_width-1:spi_data_bits]] <= spi_data[pwm_width-1:0];
 
 
-spi_slave #(.width(spi_width)) spi(.*, .data_ready(spi_valid), .shiftreg(spi_data), .reset(0));
+spi_slave #(.width(spi_width)) spi(.data_ready(spi_valid), .shiftreg(spi_data), .reset(rst), .*);
 
-pwm #(.pwm_width(pwm_width), .num_pwm(num_pwm)) pwm_i(.*, .new_thres(pwm_thres), .set_thres(spi_valid), .sel_thres(pwm_sel));
+pwm #(.pwm_width(pwm_width), .num_pwm(num_pwm)) pwm_i(.thres(thres), .*);
 
 endmodule
