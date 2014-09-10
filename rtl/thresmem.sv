@@ -18,6 +18,7 @@ module thresmem
 
    logic [pwm_width-1:0]          mem[0:num_pwm-1][0:1];
    logic                          read_slice, write_slice;
+   logic [pwm_width-1:0]          rdata_int[0:1];
 
 assign write_slice = ~read_slice;
 
@@ -28,14 +29,26 @@ always_ff @(posedge clk or posedge rst)
     if (latch_mem)
       read_slice <= ~read_slice;
 
-always_ff @(posedge clk)
-  if (write_enable & write_slice == 0)
-    mem[waddr][0] <= wdata;
+   logic                          we0, we1;
+
+assign we0 = write_enable & (write_slice == 0);
+assign we1 = write_enable & (write_slice == 1);
+
+   logic [$clog2(num_pwm)-1:0]    addr[0:1];
+
+assign addr[0] = we0 ? waddr : raddr;
+assign addr[1] = we1 ? waddr : raddr;
 
 always_ff @(posedge clk)
-  if (write_enable & write_slice == 1)
-    mem[waddr][1] <= wdata;
+  if (we0)
+    mem[addr[0]][0]  = wdata;
+assign rdata_int[0] = (read_slice == 0) ? mem[addr[0]][0] : {default:'z};
 
-assign rdata = read_slice == 0 ? mem[raddr][0] : mem[raddr][1];
+always_ff @(posedge clk)
+  if (we1)
+    mem[addr[1]][1] = wdata;
+assign rdata_int[1] = (read_slice == 1) ? mem[addr[1]][1] : {default:'z};
+
+assign rdata = read_slice == 0 ? rdata_int[0] : rdata_int[1];
 
 endmodule
