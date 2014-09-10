@@ -1,17 +1,17 @@
 module pwm
-  #(parameter pwm_width = 16,
+  #(
+    parameter pwm_width = 16,
     parameter num_pwm = 4
     )
 (
- input wire                 clk,
- input wire                 rst,
- input wire [pwm_width-1:0] thres [num_pwm-1:0],
- output logic [num_pwm-1:0] pwm_out
+ input wire                         clk,
+ input wire                         rst,
+ output logic [$clog2(num_pwm)-1:0] thres_id,
+ input wire [pwm_width-1:0]         thres,
+ output logic                       latch_mem,
+ output logic [num_pwm-1:0]         pwm_out
  );
 
-
-   logic [pwm_width-1:0]    pwm_thres [num_pwm-1:0];
-   logic [pwm_width-1:0]    cur_thres;
 
    logic                    pwm_match;
    logic                    match_result;
@@ -23,31 +23,13 @@ module pwm
 
    logic [$clog2(num_pwm)-1:0] pwm_round, pwm_round_nxt;
    logic                       new_round;
-   logic                       latch_mem;
 
 
-// single port memory
-// short-circuit channel 0 from input thresholds
 assign latch_mem = overflow_nxt & new_round;
-
-always_ff @(posedge clk or posedge rst)
-  if (rst)
-  begin
-     pwm_thres <= { default:'0 };
-     cur_thres <= 0;
-  end else begin
-     if (latch_mem)
-     begin
-        pwm_thres <= thres;
-        cur_thres <= thres[0];
-     end else begin
-        cur_thres <= thres[pwm_round];
-     end
-  end
-
 
 assign pwm_round_nxt = (pwm_round == num_pwm - 1) ? 0 : pwm_round + 1;
 assign new_round = pwm_round_nxt == 0;
+assign thres_id = pwm_round_nxt;
 
 always_ff @(posedge clk or posedge rst)
   if (rst)
@@ -75,7 +57,7 @@ always_ff @(posedge clk or posedge rst)
 
 // manually calculate comparison to avoid the default comparator
 // implementation, which uses carry chains and overflows our fpga.
-assign pwm_match = ~(|(counter ^ cur_thres));
+assign pwm_match = ~(|(counter ^ thres));
 
 always_comb
 begin

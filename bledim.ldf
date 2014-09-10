@@ -12,6 +12,9 @@
         <Source name="rtl/spi_slave.sv" type="Verilog" type_short="Verilog">
             <Options/>
         </Source>
+        <Source name="rtl/thresmem.sv" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
         <Source name="bledim.lpf" type="Logic Preference" type_short="LPF">
             <Options/>
         </Source>
