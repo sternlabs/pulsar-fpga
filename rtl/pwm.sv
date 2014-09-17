@@ -4,93 +4,63 @@ module pwm
     parameter num_pwm = 4
     )
 (
- input wire                         clk,
- input wire                         rst,
- output logic [$clog2(num_pwm)-1:0] thres_id,
- input wire [pwm_width-1:0]         thres,
- output logic                       latch_mem,
- output logic [num_pwm-1:0]         pwm_out
+ clk,
+ rst,
+ pwm_addr,
+ pwm_data,
+ latch_mem,
+ pwm_out
  );
 
+   typedef logic  [$clog2(pwm_width)-1:0] pwm_addr_t;
 
-   logic                    pwm_match;
-   logic                    match_result;
-   logic                    pwm_event;
-   logic [num_pwm-1:0]      pwm_out_nxt;
+   input var logic                        clk;
+   input var logic                        rst;
+   output                                 pwm_addr_t pwm_addr;
+   input var logic [num_pwm-1:0]          pwm_data;
+   output logic                           latch_mem;
 
-   logic [pwm_width-1:0]    counter, counter_nxt;
-   logic                    overflow, overflow_nxt;
+   output logic [num_pwm-1:0]             pwm_out;
 
-   logic [$clog2(num_pwm)-1:0] pwm_round, pwm_round_nxt;
-   logic                       new_round;
-
-
-assign latch_mem = overflow_nxt & new_round;
-
-assign pwm_round_nxt = (pwm_round == num_pwm - 1) ? 0 : pwm_round + 1;
-assign new_round = pwm_round_nxt == 0;
-assign thres_id = pwm_round_nxt;
-
-always_ff @(posedge clk or posedge rst)
-  if (rst)
-    pwm_round <= 0;
-  else
-    pwm_round <= pwm_round_nxt;
+pwm_addr_t pwm_addr_nxt;
+   logic [pwm_width-1:0]                  counter, counter_plus_one, counter_nxt;
+   logic                                  overflow, overflow_nxt;
 
 
-assign counter_nxt = &(counter + 1'b1) ? 0 : counter + 1;
+assign latch_mem = overflow;
+
+assign counter_plus_one = counter + 1;
 assign overflow_nxt = (counter[pwm_width-1] == 1'b1) &
-                      (counter_nxt[pwm_width-1] == 1'b0);
+                      (counter_plus_one[pwm_width-1] == 1'b0);
+assign counter_nxt = overflow_nxt ? 1 : counter_plus_one;
 
 always_ff @(posedge clk or posedge rst)
   if (rst)
   begin
      counter  <= 0;
      overflow <= 0;
-  end else
-    if (new_round)
-    begin
-       counter  <= counter_nxt;
-       overflow <= overflow_nxt;
-    end
-
-
-// manually calculate comparison to avoid the default comparator
-// implementation, which uses carry chains and overflows our fpga.
-assign pwm_match = ~(|(counter ^ thres));
+  end else begin
+     counter  <= counter_nxt;
+     overflow <= overflow_nxt;
+  end
 
 always_comb
 begin
-   pwm_event  = 0;
-   match_result = 0;
-   if (overflow)
-   begin
-      match_result  = 1;
-      pwm_event     = 1;
-   end
-   if (pwm_match)
-   begin
-      match_result  = 0;
-      pwm_event     = 1;
-   end
+   pwm_addr_nxt  = 0;
+
+   for (int i = 0; i < pwm_width; ++i)
+     if (counter[i])
+       pwm_addr_nxt  = i;
 end
 
-always_ff @(posedge clk or posedge rst)
-  if (rst)
-    pwm_out_nxt <= { default:'0 };
-  else
-    if (pwm_event)
-      pwm_out_nxt[pwm_round] <= match_result;
+assign pwm_addr = pwm_addr_nxt;
+// always_ff @(posedge clk or posedge rst)
+//   if (rst)
+//     pwm_addr <= 0;
+//   else
+//     pwm_addr <= pwm_addr_nxt;
 
 
-// synchronize all pwm channels;
-// short circuit last channel output
-always_ff @(posedge clk or posedge rst)
-  if (rst)
-    pwm_out <= { default:'0 };
-  else
-    if (new_round)
-      pwm_out <= {pwm_event ? match_result : pwm_out_nxt[num_pwm-1], pwm_out_nxt[num_pwm-2:0]};
-
+assign pwm_out = pwm_data;
 
 endmodule

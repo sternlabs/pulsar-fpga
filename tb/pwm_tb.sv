@@ -5,12 +5,12 @@ module pwm_tb;
 
    logic clk;
    logic rst;
-   logic [1:0] thres_id;
-   logic [2:0] thres;
+   logic [1:0] pwm_addr;
+   logic [3:0] pwm_data;
    logic       latch_mem;
    logic [3:0] pwm_out;
 
-   logic [2:0] thres_mem[3:0] = {default:'0};
+   logic [3:0] thres_mem[0:2] = {default:'0};
 
 pwm #(.pwm_width(3), .num_pwm(4)) dut(.*);
 
@@ -36,14 +36,16 @@ end
 
 always_ff @(posedge clk)
 begin
-   thres <= thres_mem[thres_id];
+   pwm_data <= thres_mem[pwm_addr];
 end
 
 
 initial begin
    #50;
    @(posedge latch_mem);
-   thres_mem  = '{ 2, 4, 7, 1 };
+   thres_mem  = '{ 'b1001,
+                   'b1011,
+                   'b0101 };
 end
 
 
