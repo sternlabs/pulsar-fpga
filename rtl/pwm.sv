@@ -37,7 +37,7 @@ assign counter_nxt = overflow_nxt ? 1 : counter_plus_one;
 always_ff @(posedge clk or posedge rst)
   if (rst)
   begin
-     counter  <= 0;
+     counter  <= 1;
      overflow <= 0;
   end else begin
      counter  <= counter_nxt;
