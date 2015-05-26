@@ -9,10 +9,16 @@
         <Source name="rtl/pwm.sv" type="Verilog" type_short="Verilog">
             <Options/>
         </Source>
+        <Source name="rtl/thresmem.sv" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
         <Source name="rtl/spi_slave.sv" type="Verilog" type_short="Verilog">
             <Options/>
         </Source>
-        <Source name="rtl/thresmem.sv" type="Verilog" type_short="Verilog">
+        <Source name="rtl/machxo2/platform.sv" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="rtl/por.sv" type="Verilog" type_short="Verilog">
             <Options/>
         </Source>
         <Source name="bledim.lpf" type="Logic Preference" type_short="LPF">

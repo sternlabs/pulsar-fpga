@@ -1,8 +1,4 @@
 module thresmem
-  #(
-    parameter pwm_width = 16,
-    parameter num_pwm = 4
-    )
 (
  clk,
  rst,
@@ -16,9 +12,12 @@ module thresmem
  rdata
  );
 
+parameter pwm_width = 16;
+parameter num_pwm = 4;
+
 localparam elem_count = pwm_width;
 localparam addr_width = $clog2(elem_count);
-localparam mem_width = $clog2(num_pwm);
+localparam mem_width = num_pwm;
 
    typedef logic [addr_width-1:0] addr_t;
    typedef logic [mem_width-1:0]  elem_t;

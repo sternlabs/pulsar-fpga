@@ -1,23 +1,36 @@
-SRCS=	pwm.sv
+SRCS=	top.sv machxo2/platform.sv por.sv pwm.sv thresmem.sv
 TBS=	pwm_tb.sv
 
 _srcs= $(addprefix rtl/,${SRCS})
 _tbs= $(addprefix tb/,${TBS})
 
-SYNPLIFYPRJ=	bledim_syn.prj
+DIAMONDPRJ=	bledim.ldf
 
 MODELSIMDIR?=	/opt/altera/14.0/modelsim_ase/linux
 DIAMONDDIR?=	/usr/local/diamond/3.2_x64
 
 define synplify_get_impl
-$(shell awk '$$1 == "impl" && $$2 == "-active" { print $$3 }' ${SYNPLIFYPRJ})
+$(shell ruby -rnokogiri -e '
+p = Nokogiri::XML(File.read(ARGV[0]))
+r = {
+project: p.xpath("//BaliProject/@title"),
+impl: p.xpath("//BaliProject/@default_implementation"),
+dir: p.xpath("//BaliProject/Implementation[@title=//BaliProject/@default_implementation]/@dir"),
+}
+r[:synprj] = "#{r[:project]}_#{r[:impl]}_synplify.tcl"
+print r[ARGV[1].to_sym]
+' ${DIAMONDPRJ} $1)
 endef
 
 define SYNPLIFY ?=
-LD_LIBRARY_PATH=${DIAMONDDIR}/bin/lin64/synpwrap \
+cd $(call synplify_get_impl,dir) && \
+rm synlog/report/*; \
+env LD_LIBRARY_PATH=${DIAMONDDIR}/bin/lin64 \
 SYNPLIFY_PATH=${DIAMONDDIR}/synpbase \
-${DIAMONDDIR}/bin/lin64/synpwrap -prj ${SYNPLIFYPRJ};
-cat $(call synplify_get_impl)/synlog/report/*.txt
+${DIAMONDDIR}/bin/lin64/synpwrap -prj $(call synplify_get_impl,synprj); \
+e=$$?; \
+cat synlog/report/*.txt; \
+exit $$e
 endef
 
 all: simulate
@@ -30,14 +43,15 @@ lint: ${SRCS:.sv=-lint}
 %-lint: %.sv
 	verilator -Dsynthesis --lint-only -Wall $^
 
-compile: compile-modelsim compile-synplify
+compile: compile-modelsim.stamp compile-synplify.stamp
 
 compile-modelsim.stamp: work ${_srcs} ${_tbs}
 	${MODELSIMDIR}/vlog -sv12compat -lint $^
 	touch $@
 
-compile-synplify:
+compile-synplify.stamp: ${_srcs} ${SYNPLIFYPRJ}
 	${SYNPLIFY}
+	touch $@
 
 simulate: $(patsubst %.sv,%.vcd,${TBS})
 
