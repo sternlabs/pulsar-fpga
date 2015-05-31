@@ -16,7 +16,7 @@ function integer roundup8;
    end
 endfunction
 
-localparam spi_data_bits = roundup8(pwm_width);
+localparam spi_data_bits = roundup8(num_pwm);
 localparam spi_width = spi_data_bits;
 
 
@@ -34,14 +34,14 @@ localparam spi_width = spi_data_bits;
    logic                      transfer_done;
    logic                      data_ready;
 
-   logic [$clog2(num_pwm)-1:0] write_addr;
-   logic [num_pwm-1:0]         write_data;
-   logic                       write_enable;
-   logic                       write_done;
+   logic [$clog2(pwm_width)-1:0] write_addr;
+   logic [num_pwm-1:0]           write_data;
+   logic                         write_enable;
+   logic                         write_done;
 
-   logic [$clog2(num_pwm)-1:0] read_addr;
-   logic [num_pwm-1:0]         read_data;
-   logic                       read_latch;
+   logic [$clog2(pwm_width)-1:0] read_addr;
+   logic [num_pwm-1:0]           read_data;
+   logic                         read_latch;
 
 
 platform platform(.*);

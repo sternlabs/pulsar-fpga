@@ -1,7 +1,9 @@
-SRCS=	top.sv machxo2/platform.sv por.sv pwm.sv spi_slave.sv regwrite.sv mux.sv mem.sv
-TBS=	pwm_tb.sv spi_tb.sv regwrite_tb.sv mux_tb.sv
+SRCS=	top.sv por.sv pwm.sv spi_slave.sv regwrite.sv mux.sv mem.sv
+PLATFORM_SRCS=	machxo2/platform.sv
+TBS=	pwm_tb.sv spi_tb.sv regwrite_tb.sv mux_tb.sv top_tb.sv
 
 _srcs= $(addprefix rtl/,${SRCS})
+_platform_srcs= $(addprefix rtl/,${PLATFORM_SRCS})
 _tbs= $(addprefix tb/,${TBS})
 
 DIAMONDPRJ=	bledim.ldf
@@ -49,7 +51,7 @@ compile-modelsim.stamp: work ${_srcs} ${_tbs}
 	${MODELSIMDIR}/vlog -sv12compat -lint ${_srcs} ${_tbs}
 	touch $@
 
-compile-synplify.stamp: ${_srcs} ${SYNPLIFYPRJ}
+compile-synplify.stamp: ${_srcs} ${_platform_srcs} ${SYNPLIFYPRJ}
 	${SYNPLIFY}
 	touch $@
 
