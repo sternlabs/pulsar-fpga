@@ -1,13 +1,13 @@
-SRCS=	top.sv machxo2/platform.sv por.sv pwm.sv thresmem.sv
-TBS=	pwm_tb.sv
+SRCS=	top.sv machxo2/platform.sv por.sv pwm.sv thresmem.sv spi_slave.sv
+TBS=	pwm_tb.sv spi_tb.sv
 
 _srcs= $(addprefix rtl/,${SRCS})
 _tbs= $(addprefix tb/,${TBS})
 
 DIAMONDPRJ=	bledim.ldf
 
-MODELSIMDIR?=	/opt/altera/14.0/modelsim_ase/linux
-DIAMONDDIR?=	/usr/local/diamond/3.2_x64
+MODELSIMDIR?=	/opt/altera/15.0/modelsim_ase/linux
+DIAMONDDIR?=	/usr/local/diamond/3.4_x64
 
 define synplify_get_impl
 $(shell ruby -rnokogiri -e '
@@ -46,7 +46,7 @@ lint: ${SRCS:.sv=-lint}
 compile: compile-modelsim.stamp compile-synplify.stamp
 
 compile-modelsim.stamp: work ${_srcs} ${_tbs}
-	${MODELSIMDIR}/vlog -sv12compat -lint $^
+	${MODELSIMDIR}/vlog -sv12compat -lint ${_srcs} ${_tbs}
 	touch $@
 
 compile-synplify.stamp: ${_srcs} ${SYNPLIFYPRJ}
