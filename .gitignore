@@ -1,2 +1,15 @@
-stdout.log
-*_Implmnt
+.recovery
+**/#*#
+*.log
+.*.ini
+bledim
+*.stamp
+*.vcd
+transcript
+*.tcl
+reportview.xml
+*.ccl
+*.htm*
+*.dir
+work
+piodrc.cfg
