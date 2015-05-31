@@ -1,4 +1,3 @@
-`default_nettype none
 `timescale 1 ns / 100 ps
 
 module spi_tb;
@@ -11,6 +10,7 @@ module spi_tb;
    logic [7:0]  shiftreg;
    logic        data_ready;
    logic        new_transfer;
+   logic        transfer_done;
 
 spi_slave #(.width(8)) dut(.*);
 

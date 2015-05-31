@@ -12,6 +12,7 @@
  input wire               reset,
  output logic [width-1:0] shiftreg,
  output logic             new_transfer,
+ output logic             transfer_done,
  output logic             data_ready
  );
 
@@ -56,5 +57,8 @@ always_ff @(posedge clk)
 
 always_ff @(posedge clk)
   new_transfer <= nCS_falling;
+
+always_ff @(posedge clk)
+  transfer_done <= nCS_rising;
 
 endmodule
