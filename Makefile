@@ -1,5 +1,5 @@
-SRCS=	top.sv machxo2/platform.sv por.sv pwm.sv thresmem.sv spi_slave.sv regwrite.sv
-TBS=	pwm_tb.sv spi_tb.sv regwrite_tb.sv
+SRCS=	top.sv machxo2/platform.sv por.sv pwm.sv spi_slave.sv regwrite.sv mux.sv mem.sv
+TBS=	pwm_tb.sv spi_tb.sv regwrite_tb.sv mux_tb.sv
 
 _srcs= $(addprefix rtl/,${SRCS})
 _tbs= $(addprefix tb/,${TBS})
